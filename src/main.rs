@@ -43,7 +43,9 @@ fn main() {
             if enemy.y > d.get_screen_height() as f32 {
                 purge.push(enemy.id);
             }
-            if enemy.track == player_track && enemy.y > 500.0 && enemy.y < 550.0 {
+            if enemy.track == player_track &&
+                ((enemy.y > 500.0 && enemy.y < 550.0) ||
+                (enemy.y + 50.0 > 500.0 && enemy.y + 50.0 < 550.0)) {
                 purge.push(enemy.id);
                 score += 1;
             }
