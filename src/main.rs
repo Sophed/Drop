@@ -1,3 +1,5 @@
+use rand::Rng;
+
 use draw::*;
 use input::*;
 use raylib::prelude::*;
@@ -5,8 +7,8 @@ mod draw;
 mod input;
 
 const TRACKS: i32 = 4;
-const _INTERVAL_SECONDS: f64 = 1.0;
-const ENEMY_SPEED: f32 = 0.1;
+const INTERVAL_SECONDS: f64 = 0.52;
+const ENEMY_SPEED: f32 = 0.16;
 
 struct Enemy {
     track: i32,
@@ -22,7 +24,9 @@ fn main() {
         .build();
 
     let mut score = 0;
+    let mut missed = 0;
     let mut player_track = 1;
+    let mut last_spawn = 0.0;
     let mut enemies: Vec<Enemy> = Vec::new();
 
     enemies.push(Enemy {
@@ -37,11 +41,22 @@ fn main() {
         draw_tracks(&mut d, TRACKS);
         player_track = input(&mut d, &mut player_track, TRACKS);
 
+        if d.get_time() - last_spawn > INTERVAL_SECONDS {
+            last_spawn = d.get_time();
+            let track = rand::thread_rng().gen_range(0..TRACKS);
+            enemies.push(Enemy {
+                track: track,
+                y: 0.0,
+                id: d.get_time() as i32,
+            });
+        }
+
         let mut purge: Vec<i32> = Vec::new();
         for enemy in &mut enemies {
             enemy.y += ENEMY_SPEED;
             if enemy.y > d.get_screen_height() as f32 {
                 purge.push(enemy.id);
+                missed += 1;
             }
             if enemy.track == player_track &&
                 ((enemy.y > 500.0 && enemy.y < 550.0) ||
@@ -58,10 +73,12 @@ fn main() {
             );
         }
         for id in purge {
-            enemies.retain(|e| e.id != id);
+            let e = enemies.iter().position(|x| x.id == id).unwrap();
+            enemies.remove(e);
         }
 
         d.draw_text(&format!("Score: {}", score), 20, 20, 30, Color::WHITE);
+        d.draw_text(&format!("Missed: {}", missed), 20, 60, 30, Color::WHITE);
         draw_player(&mut d, player_track);
 
     }
