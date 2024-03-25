@@ -7,7 +7,7 @@ pub fn draw_tracks(d: &mut RaylibDrawHandle, tracks: i32) {
             0,
             14,
             d.get_screen_height(),
-            Color::DARKGRAY
+            Color::new(10, 10, 10, 255)
         )
     }
 }
